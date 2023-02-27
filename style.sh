@@ -60,22 +60,20 @@ main() {
     check_depends clang-format "$YAPF"
 
     SCRIPT_DIR="$(dirname "$(realpath "${BASH_SOURCE[0]}")")"
-    TUTORIAL_DIR="$SCRIPT_DIR/tutorial"
-    # mapfile -t FILES < <(find "$TUTORIAL_DIR" -type f -name '*.py')
 
     if [ $OVERWRITE -eq 0 ]; then
         # C++: clang-format
-        find "$TUTORIAL_DIR" -type f -regex '.*\.\(c\|h\|cpp\|hpp\)' \
+        find "$SCRIPT_DIR" -type f -regex '.*\.\(c\|h\|cpp\|hpp\)' \
             -exec clang-format --Werror --dry-run {} +
         # Python: yapf
-        $YAPF -p -r -d "$TUTORIAL_DIR"
+        $YAPF -p -r -d "$SCRIPT_DIR"
         msg "Coding style is compliant"
     else
         # C++: clang-format
-        find "$TUTORIAL_DIR" -type f -regex '.*\.\(c\|h\|cpp\|hpp\)' \
+        find "$SCRIPT_DIR" -type f -regex '.*\.\(c\|h\|cpp\|hpp\)' \
             -exec clang-format --Werror -i {} +
         # Python: yapf
-        $YAPF -p -r -i "$TUTORIAL_DIR"
+        $YAPF -p -r -i "$SCRIPT_DIR"
     fi
 }
 
