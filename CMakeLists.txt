@@ -34,25 +34,20 @@ endif()
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake")
 add_subdirectory(third_party/libbpf)
 add_subdirectory(third_party/bpftool)
+find_package(BpfObject REQUIRED)
 
-# set(BPFOBJECT_VMLINUX_H ${CMAKE_CURRENT_SOURCE_DIR}/../../vmlinux/vmlinux.h)
-# find_package(BpfObject REQUIRED)
+#
+# source directory and files
+#
+set(SRC_DIR ${CMAKE_CURRENT_SOURCE_DIR}/src)
+FILE(GLOB_RECURSE BPF_SRC_FILES CONFIGURE_DEPENDS ${SRC_DIR}/*.bpf.c)
 
-# #
-# # source directory and files
-# #
-# set(SRC_DIR ${CMAKE_CURRENT_SOURCE_DIR}/src)
-# FILE(GLOB_RECURSE BPF_SRC_FILES CONFIGURE_DEPENDS ${SRC_DIR}/*.bpf.c)
-
-# #
-# # executable target for each bpf application
-# #
-# foreach(BPF_SRC_FILE ${BPF_SRC_FILES})
-#     get_filename_component(BPF_STEM ${BPF_SRC_FILE} NAME_WE)
-
-#     bpf_object(${BPF_STEM} ${BPF_STEM}.bpf.c)
-#     add_dependencies(${BPF_STEM}_skel libbpf-build)
-
-#     add_executable(${BPF_STEM} ${BPF_STEM}.c)
-#     target_link_libraries(${BPF_STEM} ${BPF_STEM}_skel)
-# endforeach()
+#
+# executable target for each bpf application
+#
+foreach(BPF_SRC_FILE ${BPF_SRC_FILES})
+    get_filename_component(BPF_STEM ${BPF_SRC_FILE} NAME_WE)
+    bpf_object(${BPF_STEM} ${BPF_STEM}.bpf.c)
+    add_executable(${BPF_STEM} ${SRC_DIR}/${BPF_STEM}.c)
+    target_link_libraries(${BPF_STEM} ${BPF_STEM}_skel)
+endforeach()
