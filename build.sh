@@ -65,7 +65,7 @@ main() {
     BUILD_DIR="$(realpath "${PROJECT_DIR}"/build)"
 
     cd "${PROJECT_DIR}"
-    git submodule update --init
+    git submodule update --init --recursive
 
     if [ $REBUILD -ne 0 ] || [ $CLEAN -ne 0 ]; then
         # clean up old builds
