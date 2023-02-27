@@ -61,7 +61,7 @@ main() {
     export MAKEFLAGS
 
     SCRIPT_DIR="$(dirname "$(realpath "${BASH_SOURCE[0]}")")"
-    PROJECT_DIR="$(realpath "${SCRIPT_DIR}")"
+    PROJECT_DIR="$(realpath "${SCRIPT_DIR}"/..)"
     BUILD_DIR="$(realpath "${PROJECT_DIR}"/build)"
 
     cd "${PROJECT_DIR}"

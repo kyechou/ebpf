@@ -60,20 +60,21 @@ main() {
     check_depends clang-format "$YAPF"
 
     SCRIPT_DIR="$(dirname "$(realpath "${BASH_SOURCE[0]}")")"
+    SRC_DIR="$(realpath "$SCRIPT_DIR/../src")"
 
     if [ $OVERWRITE -eq 0 ]; then
         # C++: clang-format
-        find "$SCRIPT_DIR" -type f -regex '.*\.\(c\|h\|cpp\|hpp\)' \
+        find "$SRC_DIR" -type f -regex '.*\.\(c\|h\|cpp\|hpp\)' \
             -exec clang-format --Werror --dry-run {} +
         # Python: yapf
-        $YAPF -p -r -d "$SCRIPT_DIR"
+        $YAPF -p -r -d "$SRC_DIR"
         msg "Coding style is compliant"
     else
         # C++: clang-format
-        find "$SCRIPT_DIR" -type f -regex '.*\.\(c\|h\|cpp\|hpp\)' \
+        find "$SRC_DIR" -type f -regex '.*\.\(c\|h\|cpp\|hpp\)' \
             -exec clang-format --Werror -i {} +
         # Python: yapf
-        $YAPF -p -r -i "$SCRIPT_DIR"
+        $YAPF -p -r -i "$SRC_DIR"
     fi
 }
 
