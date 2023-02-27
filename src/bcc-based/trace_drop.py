@@ -39,7 +39,7 @@ def print_pkt_drop(ctx, data, size):
 
 
 def main():
-    b = BPF(src_file='network.c', cflags=['-fcf-protection'])
+    b = BPF(src_file='trace_drop.c', cflags=['-fcf-protection'])
 
     b["pkt_drops"].open_ring_buffer(print_pkt_drop)
     print('Ready')
