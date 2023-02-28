@@ -1,0 +1,153 @@
+#include "vmlinux.h"
+
+#include "trace_drop.h"
+
+#include <bpf/bpf_core_read.h>
+#include <bpf/bpf_helpers.h>
+
+char LICENSE[] SEC("license") = "Dual MIT/GPL";
+
+// BPF_RINGBUF_OUTPUT(pkt_drops, 8);
+
+static inline bool skb_mac_header_was_set(const struct sk_buff *skb) {
+    u16 mac_header;
+    BPF_CORE_READ_INTO(&mac_header, skb, mac_header);
+    return mac_header != (typeof(mac_header))~0U;
+}
+
+static inline unsigned char *skb_mac_header(const struct sk_buff *skb) {
+    u16 mac_header;
+    unsigned char *head;
+    BPF_CORE_READ_INTO(&mac_header, skb, mac_header);
+    BPF_CORE_READ_INTO(&head, skb, head);
+    return head + mac_header;
+}
+
+static inline u32 skb_network_header_len(const struct sk_buff *skb) {
+    u16 th, nh;
+    BPF_CORE_READ_INTO(&th, skb, transport_header);
+    BPF_CORE_READ_INTO(&nh, skb, network_header);
+    return th - nh;
+}
+
+static inline unsigned char *skb_network_header(const struct sk_buff *skb) {
+    u16 nh;
+    unsigned char *head;
+    BPF_CORE_READ_INTO(&head, skb, head);
+    BPF_CORE_READ_INTO(&nh, skb, network_header);
+    return head + nh;
+}
+
+static inline bool skb_transport_header_was_set(const struct sk_buff *skb) {
+    u16 th;
+    BPF_CORE_READ_INTO(&th, skb, transport_header);
+    return th != (typeof(th))~0U;
+}
+
+static inline unsigned char *skb_transport_header(const struct sk_buff *skb) {
+    u16 th;
+    unsigned char *head;
+    BPF_CORE_READ_INTO(&head, skb, head);
+    BPF_CORE_READ_INTO(&th, skb, network_header);
+    return head + th;
+}
+
+static inline struct ethhdr *eth_hdr(const struct sk_buff *skb) {
+    return (struct ethhdr *)skb_mac_header(skb);
+}
+
+static inline struct iphdr *ip_hdr(const struct sk_buff *skb) {
+    return (struct iphdr *)skb_network_header(skb);
+}
+
+static inline struct tcphdr *tcp_hdr(const struct sk_buff *skb) {
+    return (struct tcphdr *)skb_transport_header(skb);
+}
+
+static inline struct udphdr *udp_hdr(const struct sk_buff *skb) {
+    return (struct udphdr *)skb_transport_header(skb);
+}
+
+static inline struct icmphdr *icmp_hdr(const struct sk_buff *skb) {
+    return (struct icmphdr *)skb_transport_header(skb);
+}
+
+SEC("tracepoint/skb/kfree_skb")
+int tracepoint__kfree_skb(struct trace_event_raw_kfree_skb *args) {
+    struct drop_data data = {};
+    struct sk_buff *skb;
+    unsigned short protocol;
+    unsigned int len;
+    int skb_iif;
+
+    BPF_CORE_READ_INTO(&skb, args, skbaddr);
+    BPF_CORE_READ_INTO(&protocol, args, protocol);
+    BPF_CORE_READ_INTO(&len, skb, len);
+    BPF_CORE_READ_INTO(&skb_iif, skb, skb_iif);
+
+    if (len == 0 || !skb_iif || protocol != ETH_P_IP) {
+        return 0;
+    }
+
+    // L1
+    BPF_CORE_READ_INTO(&data.ifindex, skb, dev, ifindex);
+    BPF_CORE_READ_INTO(&data.ingress_ifindex, skb, skb_iif);
+    // auxiliary
+    BPF_CORE_READ_INTO(&data.location, args, location);
+    data.tstamp = bpf_ktime_get_tai_ns();
+    BPF_CORE_READ_INTO(&data.reason, args, reason);
+
+    // L2
+    if (skb_mac_header_was_set(skb)) {
+        struct ethhdr *eth = eth_hdr(skb);
+        BPF_CORE_READ_INTO(&data.eth_dst_addr, eth, h_dest);
+        BPF_CORE_READ_INTO(&data.eth_src_addr, eth, h_source);
+    }
+
+    BPF_CORE_READ_INTO(&data.eth_proto, args, protocol);
+
+    // L3
+    if (data.eth_proto == ETH_P_IP && skb_network_header_len(skb) > 0) {
+        struct iphdr *nh = ip_hdr(skb);
+        BPF_CORE_READ_INTO(&data.tot_len, nh, tot_len);
+        BPF_CORE_READ_INTO(&data.ip_proto, nh, protocol);
+        BPF_CORE_READ_INTO(&data.saddr, nh, saddr);
+        BPF_CORE_READ_INTO(&data.daddr, nh, daddr);
+    }
+
+    // L4
+    if (skb_transport_header_was_set(skb)) {
+        if (data.ip_proto == IPPROTO_TCP) {
+            struct tcphdr *th = tcp_hdr(skb);
+            BPF_CORE_READ_INTO(&data.transport.sport, th, source);
+            BPF_CORE_READ_INTO(&data.transport.dport, th, dest);
+            // th->seq;
+        } else if (data.ip_proto == IPPROTO_UDP) {
+            struct udphdr *uh = udp_hdr(skb);
+            BPF_CORE_READ_INTO(&data.transport.sport, uh, source);
+            BPF_CORE_READ_INTO(&data.transport.dport, uh, dest);
+            data.transport.seq = 0;
+            data.transport.ack = 0;
+        } else if (data.ip_proto == IPPROTO_ICMP) {
+            struct icmphdr *ih = icmp_hdr(skb);
+            BPF_CORE_READ_INTO(&data.icmp.icmp_type, ih, type);
+            if (data.icmp.icmp_type == ICMP_ECHOREPLY ||
+                data.icmp.icmp_type == ICMP_ECHO) {
+                BPF_CORE_READ_INTO(&data.icmp.icmp_echo_id, ih, un.echo.id);
+                BPF_CORE_READ_INTO(&data.icmp.icmp_echo_seq, ih,
+                                   un.echo.sequence);
+            } else {
+                data.icmp.icmp_echo_id = 0;
+                data.icmp.icmp_echo_seq = 0;
+            }
+        } else {
+            return 0;
+        }
+    }
+
+    // pkt_drops.ringbuf_output(&data, sizeof(data), 0);
+
+    bpf_printk("ingress iif %d", skb_iif);
+
+    return 0;
+}

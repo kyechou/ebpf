@@ -144,7 +144,7 @@ macro(bpf_object name input)
 
     # Build BPF object file
     add_custom_command(OUTPUT ${BPF_O_FILE}
-        COMMAND ${CLANG_EXE} ${COMPILE_FLAGS} -target bpf
+        COMMAND ${CLANG_EXE} ${COMPILE_FLAGS} -g -target bpf
             -D__TARGET_ARCH_${ARCH} ${CLANG_SYSTEM_INCLUDES}
             -I${VMLINUX_H_BASEDIR} -isystem ${libbpf_INCLUDE_DIRS}
             -c ${BPF_C_FILE} -o ${BPF_O_FILE}
