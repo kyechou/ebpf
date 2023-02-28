@@ -9,7 +9,7 @@ char LICENSE[] SEC("license") = "Dual MIT/GPL";
 
 struct {
     __uint(type, BPF_MAP_TYPE_RINGBUF);
-    __uint(max_entries, 256 * 1024);
+    __uint(max_entries, 256 * 1024 /* 256 KB */);
 } events SEC(".maps");
 
 static inline bool skb_mac_header_was_set(const struct sk_buff *skb) {
