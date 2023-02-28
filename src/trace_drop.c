@@ -7,6 +7,9 @@
 #include "trace_drop.h"
 #include "trace_drop.skel.h"
 
+#define FN(reason) [SKB_DROP_REASON_##reason] = #reason,
+static const char *const drop_reasons[] = {DEFINE_DROP_REASON(FN, FN)};
+
 static int libbpf_print_fn(enum libbpf_print_level level,
                            const char *format,
                            va_list args) {
@@ -21,9 +24,9 @@ static int rb_handler(void *ctx __attribute__((unused)),
                       void *data,
                       size_t size __attribute__((unused))) {
     struct drop_data *d = data;
-    printf("[%.9f] dev: %d, iif: %d, reason: %d, ip len: %d, ip proto: %d\n",
-           (double)d->tstamp / 1e9, d->ifindex, d->ingress_ifindex, d->reason,
-           d->tot_len, d->ip_proto);
+    printf("[%.9f] dev: %d, iif: %d, ip len: %d, ip proto: %d, reason: %s\n",
+           (double)d->tstamp / 1e9, d->ifindex, d->ingress_ifindex, d->tot_len,
+           d->ip_proto, drop_reasons[d->reason]);
     return 0;
 }
 
