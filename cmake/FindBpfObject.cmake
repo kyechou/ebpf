@@ -38,8 +38,8 @@ Example Usage:
 #
 # Find clang and check clang version
 #
-if (NOT "${CMAKE_C_COMPILER}" MATCHES "clang")
-    message(FATAL_ERROR "CMAKE_C_COMPILER isn't clang")
+if (NOT "${CMAKE_C_COMPILER_ID}" STREQUAL "Clang")
+    message(FATAL_ERROR "Compiler isn't clang")
 endif()
 
 find_program(CLANG_EXE NAMES ${CMAKE_C_COMPILER} REQUIRED)

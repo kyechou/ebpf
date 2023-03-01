@@ -1,12 +1,12 @@
 cmake_minimum_required(VERSION 3.16)
+set(CMAKE_C_COMPILER clang)
+set(CMAKE_CXX_COMPILER clang++)
 project(ebpf VERSION 0.1 HOMEPAGE_URL https://github.com/kyechou/ebpf LANGUAGES C CXX)
 include(ExternalProject)
 
 #
 # compile options
 #
-set(CMAKE_C_COMPILER clang)
-set(CMAKE_CXX_COMPILER clang++)
 set(CMAKE_C_STANDARD 17)
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_C_STANDARD_REQUIRED ON)
