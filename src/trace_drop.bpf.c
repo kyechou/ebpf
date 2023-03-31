@@ -77,8 +77,8 @@ static inline struct icmphdr *icmp_hdr(const struct sk_buff *skb) {
 
 SEC("tracepoint/skb/kfree_skb")
 int tracepoint__kfree_skb(struct trace_event_raw_kfree_skb *args) {
-    struct drop_data *data = NULL;
-    struct sk_buff *skb = NULL;
+    struct drop_data *data = (struct drop_data *)NULL;
+    struct sk_buff *skb = (struct sk_buff *)NULL;
     unsigned short protocol = 0;
     unsigned int len = 0;
     int skb_iif = 0;
@@ -92,7 +92,8 @@ int tracepoint__kfree_skb(struct trace_event_raw_kfree_skb *args) {
         return 0;
     }
 
-    data = bpf_ringbuf_reserve(&events, sizeof(struct drop_data), 0);
+    data = (struct drop_data *)bpf_ringbuf_reserve(&events,
+                                                   sizeof(struct drop_data), 0);
     if (!data) {
         return 0;
     }

@@ -14,6 +14,10 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 add_compile_options(-Wall -Wextra -Werror -O2)
 
+if (CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
+    add_compile_options(-Wno-c99-designator)
+endif()
+
 #
 # release/debug compile options
 #
@@ -48,6 +52,6 @@ FILE(GLOB_RECURSE BPF_SRC_FILES CONFIGURE_DEPENDS ${SRC_DIR}/*.bpf.c)
 foreach(BPF_SRC_FILE ${BPF_SRC_FILES})
     get_filename_component(BPF_STEM ${BPF_SRC_FILE} NAME_WE)
     bpf_object(${BPF_STEM} ${BPF_STEM}.bpf.c)
-    add_executable(${BPF_STEM} ${SRC_DIR}/${BPF_STEM}.c)
-    target_link_libraries(${BPF_STEM} ${BPF_STEM}_skel)
+    add_executable(${BPF_STEM} ${SRC_DIR}/${BPF_STEM}.cpp)
+    target_link_libraries(${BPF_STEM} PRIVATE ${BPF_STEM}_skel)
 endforeach()

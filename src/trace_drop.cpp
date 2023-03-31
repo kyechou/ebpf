@@ -23,7 +23,7 @@ static int libbpf_print_fn(enum libbpf_print_level level,
 static int rb_handler(void *ctx __attribute__((unused)),
                       void *data,
                       size_t size __attribute__((unused))) {
-    struct drop_data *d = data;
+    struct drop_data *d = static_cast<struct drop_data *>(data);
     printf("[%.9f] dev: %d, iif: %d, ip len: %d, ip proto: %d, reason: %s\n",
            (double)d->tstamp / 1e9, d->ifindex, d->ingress_ifindex, d->tot_len,
            d->ip_proto, drop_reasons[d->reason]);
