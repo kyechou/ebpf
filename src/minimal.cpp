@@ -21,6 +21,8 @@ static int libbpf_print_fn(enum libbpf_print_level level,
 int main(void) {
     struct minimal_bpf *skel;
     int err;
+    pid_t pid = getpid();
+    uint32_t index = 0;
 
     libbpf_set_strict_mode(LIBBPF_STRICT_ALL);
     libbpf_set_print(libbpf_print_fn);
@@ -32,15 +34,28 @@ int main(void) {
         return 1;
     }
 
-    /* ensure BPF program only handles write() syscalls from our process */
-    // skel->bss->my_pid = getpid();
-
     /* Load & verify BPF programs */
     err = minimal_bpf__load(skel);
     if (err) {
         perror("Failed to load and verify BPF skeleton");
         goto cleanup;
     }
+
+    // /* flags for BPF_MAP_UPDATE_ELEM command */
+    // enum {
+    // 	BPF_ANY		= 0, /* create new element or update existing */
+    // 	BPF_NOEXIST	= 1, /* create new element if it didn't exist */
+    // 	BPF_EXIST	= 2, /* update existing element */
+    // 	BPF_F_LOCK	= 4, /* spin_lock-ed map_lookup/map_update */
+    // };
+    err = bpf_map__update_elem(skel->maps.my_pid_map, &index, sizeof(index),
+                               &pid, sizeof(pid), BPF_ANY);
+    if (err < 0) {
+        perror("Failed to update map with pid");
+        goto cleanup;
+    }
+
+    fprintf(stderr, "PID: %d\n", pid);
 
     /* Attach tracepoint handler */
     err = minimal_bpf__attach(skel);

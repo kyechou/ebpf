@@ -1,9 +1,9 @@
 #include "vmlinux.h"
 
-#include "trace_drop.h"
-
 #include <bpf/bpf_core_read.h>
 #include <bpf/bpf_helpers.h>
+
+#include "trace_drop.h"
 
 char LICENSE[] SEC("license") = "Dual MIT/GPL";
 
