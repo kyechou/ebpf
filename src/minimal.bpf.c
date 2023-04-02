@@ -15,7 +15,7 @@ SEC("tp/syscalls/sys_enter_write")
 int handle_tp(void *ctx __attribute__((unused))) {
     u32 index = 0;
     pid_t pid = bpf_get_current_pid_tgid() >> 32;
-    pid_t *my_pid = bpf_map_lookup_elem(&my_pid_map, &index);
+    pid_t *my_pid = (pid_t *)bpf_map_lookup_elem(&my_pid_map, &index);
 
     if (!my_pid || pid != *my_pid)
         return 0;
