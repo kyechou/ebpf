@@ -17,8 +17,9 @@ int handle_tp(void *ctx __attribute__((unused))) {
     pid_t pid = bpf_get_current_pid_tgid() >> 32;
     pid_t *my_pid = (pid_t *)bpf_map_lookup_elem(&my_pid_map, &index);
 
-    if (!my_pid || pid != *my_pid)
+    if (!my_pid || pid != *my_pid) {
         return 0;
+    }
 
     bpf_printk("BPF triggered from PID %d.", pid);
 

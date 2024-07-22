@@ -1,38 +1,38 @@
 #pragma once
 
 // <linux/if_ether.h>
-#define ETH_ALEN 6          /* Octets in one ethernet addr	 */
-#define ETH_TLEN 2          /* Octets in ethernet type field */
-#define ETH_HLEN 14         /* Total octets in header.	 */
-#define ETH_ZLEN 60         /* Min. octets in frame sans FCS */
-#define ETH_DATA_LEN 1500   /* Max. octets in payload	 */
-#define ETH_FRAME_LEN 1514  /* Max. octets in frame sans FCS */
-#define ETH_FCS_LEN 4       /* Octets in the FCS		 */
-#define ETH_MIN_MTU 68      /* Min IPv4 MTU per RFC791	*/
-#define ETH_MAX_MTU 0xFFFFU /* 65535, same as IP_MAX_MTU	*/
+#define ETH_ALEN      6       /* Octets in one ethernet addr	 */
+#define ETH_TLEN      2       /* Octets in ethernet type field */
+#define ETH_HLEN      14      /* Total octets in header.	 */
+#define ETH_ZLEN      60      /* Min. octets in frame sans FCS */
+#define ETH_DATA_LEN  1500    /* Max. octets in payload	 */
+#define ETH_FRAME_LEN 1514    /* Max. octets in frame sans FCS */
+#define ETH_FCS_LEN   4       /* Octets in the FCS		 */
+#define ETH_MIN_MTU   68      /* Min IPv4 MTU per RFC791	*/
+#define ETH_MAX_MTU   0xFFFFU /* 65535, same as IP_MAX_MTU	*/
 
-#define ETH_P_LOOP 0x0060  /* Ethernet Loopback packet	*/
-#define ETH_P_IP 0x0800    /* Internet Protocol packet	*/
-#define ETH_P_ARP 0x0806   /* Address Resolution packet	*/
-#define ETH_P_RARP 0x8035  /* Reverse Addr Res packet	*/
-#define ETH_P_8021Q 0x8100 /* 802.1Q VLAN Extended Header  */
-#define ETH_P_IPV6 0x86DD  /* IPv6 over bluebook		*/
+#define ETH_P_LOOP    0x0060  /* Ethernet Loopback packet	*/
+#define ETH_P_IP      0x0800  /* Internet Protocol packet	*/
+#define ETH_P_ARP     0x0806  /* Address Resolution packet	*/
+#define ETH_P_RARP    0x8035  /* Reverse Addr Res packet	*/
+#define ETH_P_8021Q   0x8100  /* 802.1Q VLAN Extended Header  */
+#define ETH_P_IPV6    0x86DD  /* IPv6 over bluebook		*/
 
 // <linux/icmp.h>
-#define ICMP_ECHOREPLY 0       /* Echo Reply			*/
-#define ICMP_DEST_UNREACH 3    /* Destination Unreachable	*/
-#define ICMP_SOURCE_QUENCH 4   /* Source Quench		*/
-#define ICMP_REDIRECT 5        /* Redirect (change route)	*/
-#define ICMP_ECHO 8            /* Echo Request			*/
-#define ICMP_TIME_EXCEEDED 11  /* Time Exceeded		*/
-#define ICMP_PARAMETERPROB 12  /* Parameter Problem		*/
-#define ICMP_TIMESTAMP 13      /* Timestamp Request		*/
+#define ICMP_ECHOREPLY      0  /* Echo Reply			*/
+#define ICMP_DEST_UNREACH   3  /* Destination Unreachable	*/
+#define ICMP_SOURCE_QUENCH  4  /* Source Quench		*/
+#define ICMP_REDIRECT       5  /* Redirect (change route)	*/
+#define ICMP_ECHO           8  /* Echo Request			*/
+#define ICMP_TIME_EXCEEDED  11 /* Time Exceeded		*/
+#define ICMP_PARAMETERPROB  12 /* Parameter Problem		*/
+#define ICMP_TIMESTAMP      13 /* Timestamp Request		*/
 #define ICMP_TIMESTAMPREPLY 14 /* Timestamp Reply		*/
-#define ICMP_INFO_REQUEST 15   /* Information Request		*/
-#define ICMP_INFO_REPLY 16     /* Information Reply		*/
-#define ICMP_ADDRESS 17        /* Address Mask Request		*/
-#define ICMP_ADDRESSREPLY 18   /* Address Mask Reply		*/
-#define NR_ICMP_TYPES 18
+#define ICMP_INFO_REQUEST   15 /* Information Request		*/
+#define ICMP_INFO_REPLY     16 /* Information Reply		*/
+#define ICMP_ADDRESS        17 /* Address Mask Request		*/
+#define ICMP_ADDRESSREPLY   18 /* Address Mask Reply		*/
+#define NR_ICMP_TYPES       18
 
 #ifndef __VMLINUX_H__
 #define DEFINE_DROP_REASON(FN, FNe)                                            \
